@@ -1,20 +1,25 @@
 # **Azure Key Vault Integration in Java (REST API Edition)**
 
 ## **Part 1: Azure Portal Configuration**
+
 This section details the step-by-step configuration required in the Azure Portal to store a secret and allow a Java application to access it.
 
 ### **Step 1: Access the Azure Portal**
+
 1.  Navigate to [https://portal.azure.com](https://portal.azure.com).
 2.  Sign in with your Microsoft account.
 3.  If you do not have an account, click **"Create one!"** to set up a free Azure trial account.
 
 ### **Step 2: Verify Active Subscription**
+
 1.  In the top search bar, type **"Subscriptions"** and select it.
-2.  Ensure you have an active subscription (e.g., "Pay-As-You-Go" or "Azure for Students"). 
-3.  *Note: Without an active subscription, you cannot create resources.*
+2.  Ensure you have an active subscription (e.g., "Pay-As-You-Go" or "Azure for Students").
+3.  _Note: Without an active subscription, you cannot create resources._
 
 ### **Step 3: Create a Resource Group**
+
 A Resource Group is a logical container for your Azure resources.
+
 1.  Search for **"Resource Groups"** in the top bar.
 2.  Click **+ Create**.
 3.  **Subscription:** Select your active subscription.
@@ -23,16 +28,18 @@ A Resource Group is a logical container for your Azure resources.
 6.  Click **Review + Create**, then click **Create**.
 
 ### **Step 4: Create the Azure Key Vault**
+
 1.  Search for **"Key Vaults"** and click **+ Create**.
 2.  **Resource Group:** Select `demo-rg`.
-3.  **Key Vault Name:** Enter `kavita-demo-vault`.
+3.  **Key Vault Name:** Enter `settribe-demo-vault`.
 4.  **Region:** Same as your Resource Group.
 5.  **Pricing Tier:** Select `Standard`.
 6.  **Access Configuration:** Ensure **"Azure role-based access control (RBAC)"** is selected (this is the modern recommended standard).
 7.  Click **Review + Create**, then click **Create**.
 
 ### **Step 5: Add a Secret to the Vault**
-1.  Go to your new Key Vault (`kavita-demo-vault`).
+
+1.  Go to your new Key Vault (`settribe-demo-vault`).
 2.  On the left-hand menu, under **Objects**, click **Secrets**.
 3.  Click **+ Generate/Import**.
 4.  **Upload options:** Manual.
@@ -41,28 +48,34 @@ A Resource Group is a logical container for your Azure resources.
 7.  Click **Create**.
 
 ### **Step 6: Create App Registration (Application Identity)**
+
 To allow Java to "log in" to Azure, we must create an Identity.
+
 1.  Search for **"App Registrations"** in the top bar.
 2.  Click **+ New Registration**.
 3.  **Name:** `java-keyvault-app`.
 4.  **Supported account types:** Accounts in this organizational directory only.
 5.  Click **Register**.
 6.  **CRITICAL:** Copy the following values to a notepad immediately:
-    *   **Application (client) ID**
-    *   **Directory (tenant) ID**
+    - **Application (client) ID**
+    - **Directory (tenant) ID**
 
 ### **Step 7: Generate Client Secret**
+
 This acts as the "password" for your Java application.
+
 1.  Inside your App Registration (`java-keyvault-app`), click **Certificates & secrets** on the left menu.
 2.  Click the **Client secrets** tab, then click **+ New client secret**.
 3.  **Description:** `java-app-token`.
 4.  Click **Add**.
-5.  **CRITICAL:** Copy the **Value** column immediately. 
-    *   *Warning: This value will be hidden forever once you refresh the page.*
+5.  **CRITICAL:** Copy the **Value** column immediately.
+    - _Warning: This value will be hidden forever once you refresh the page._
 
 ### **Step 8: Assign IAM Permissions (The "Bridge")**
+
 Even though the app exists, it doesn't have permission to look inside the Key Vault yet.
-1.  Go back to your Key Vault (**kavita-demo-vault**).
+
+1.  Go back to your Key Vault (**settribe-demo-vault**).
 2.  Click **Access Control (IAM)** on the left menu.
 3.  Click **+ Add** -> **Add role assignment**.
 4.  **Role:** Search for and select **"Key Vault Secrets User"**. Click **Next**.
@@ -84,6 +97,7 @@ Here is the updated documentation and code.
 ---
 
 ### **Step 1: Add the Dotenv Dependency**
+
 Open your `pom.xml` and add the library that allows Java to read `.env` files.
 
 ```xml
@@ -106,9 +120,11 @@ Open your `pom.xml` and add the library that allows Java to read `.env` files.
 ---
 
 ### **Step 2: Create the `.env` File**
+
 In the **root folder** of your project (the same folder where `pom.xml` is located), create a new file named `.env`.
 
 Add your Azure details here:
+
 ```text
 AZURE_TENANT_ID=your-tenant-id-here
 AZURE_CLIENT_ID=your-client-id-here
@@ -116,11 +132,13 @@ AZURE_CLIENT_SECRET=your-client-secret-here
 AZURE_VAULT_NAME=settribe-demo-vault
 AZURE_SECRET_NAME=db-password
 ```
+
 > **Security Note:** Add `.env` to your `.gitignore` file so you don't accidentally upload these credentials to GitHub.
 
 ---
 
 ### **Step 3: Update the Java Code**
+
 The code now uses `Dotenv` to load the variables at runtime.
 
 ```java
@@ -147,10 +165,10 @@ public class KeyVaultRestExample {
 
         try {
             System.out.println("Connecting to Azure...");
-            
+
             // 1. Get Access Token (Authentication)
             String token = getAccessToken(tenantId, clientId, clientSecret);
-            
+
             // 2. Get Secret (Authorization & Retrieval)
             String secretValue = getSecretFromVault(vaultName, secretName, token);
 
@@ -204,6 +222,7 @@ public class KeyVaultRestExample {
 ---
 
 ### **Step 4: Run and Verify**
+
 1. Compile and run the `KeyVaultRestExample` Java application.
 2. The console should output:
    ```text
